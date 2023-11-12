@@ -7,10 +7,10 @@ import pandas as pd
 def connect_to_mysql() -> mysql.connector:
 
     cnx = mysql.connector.connect(
-        user="username",
-        password="password",
-        host="hostname",
-        database="databasename",
+        user="root",
+        password="mysql",
+        host="127.0.0.1",
+        database="ecommerce-forsit",
         connection_timeout=10000
     )
 
@@ -56,5 +56,44 @@ def insert_sales_data(connection: cnx,
     cursor.close()
 
 
-data = pd.read_json("data.json")
-print(data)
+with open('data.json', 'r') as file:
+    json_data = json.load(file)
+
+data = json_data
+keys = list(json_data.keys())
+for key in keys:
+    for data_point in data[key]:
+        if key == 'category':
+            try:
+                insert_cat_data(cnx, data_point['cat_name'], data_point['cat_id'])
+            except mysql.connector.errors.IntegrityError as e:
+                print("Already added, Integrity Error",e)
+                continue
+        elif key == 'inventory':
+
+            try:
+                insert_inv_data(cnx, 
+                        data_point['inv_id'], 
+                        data_point['cat_id'], 
+                        data_point['current_stock'], 
+                        data_point['unit_price'],
+                        data_point['low_stock_alert'])
+            except mysql.connector.errors.IntegrityError as e:
+                print("Already added, Integrity Error",e)
+                continue
+        
+        elif key == 'sales':
+            try:
+                insert_sales_data(cnx, 
+                    data_point['inv_id'], 
+                    data_point['sale_id'], 
+                    data_point['timestamp'], 
+                    data_point['quantity_sold'],
+                    data_point['price_per_quantity'])
+                
+            except mysql.connector.errors.IntegrityError as e:
+                print("Already added, Integrity Error",e)
+                continue
+
+
+#Script end here
