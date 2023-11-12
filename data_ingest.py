@@ -50,7 +50,7 @@ def insert_sales_data(connection: cnx,
                     price_per_quantity: int):
     
     cursor = connection.cursor()
-    query = "INSERT INTO Sales (sale_id, inv_id,timestamp,quantity_sold,price_per_quantity) VALUES (%s, %s,%s,%s,%s)"
+    query = "INSERT INTO Sales (inv_id,sale_id,timestamp,quantity_sold,price_per_quantity) VALUES (%s, %s,%s,%s,%s)"
     cursor.execute(query,(inv_id, sale_id,timestamp,quantity_sold,price_per_quantity))
     connection.commit()
     cursor.close()
