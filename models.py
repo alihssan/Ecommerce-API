@@ -20,35 +20,36 @@ class Inventory(Base):
     unit_price = Column(Integer)
     cat_id = Column(Integer,ForeignKey('Categories.cat_id'))
     low_stock_alert = Column(String(20))
-    inv_id_ch_fk = relationship('Inventory_Changes', back_populates='Inventory')
-    inv_id_sales_fk = relationship('Sales', back_populates='Inventory')
-    
+    inv_id_ch_fk = relationship('Inventory_Changes', back_populates='inventory')
+    inv_id_sales_fk = relationship('Sales', back_populates='inventory')
+    category = relationship('Categories', back_populates='cat_id_fk')
 
 class Categories(Base):
     __tablename__ = "Categories"
 
     cat_id = Column(Integer, primary_key=True, index=True)
     cat_name = Column(String(45))
-    cat_id_fk = relationship('Inventory', back_populates='Categories')
+    cat_id_fk = relationship('Inventory', back_populates='category')
 
 class Inventory_Changes(Base):
     __tablename__ = "Inventory_Changes"
 
     ch_id = Column(Integer, primary_key=True, index=True)
-    inv_id = Column(Integer,ForeignKey('Inventory.inv_id'))
-    ch_date = Column(DateTime,default=func.now())
+    inv_id = Column(Integer, ForeignKey('Inventory.inv_id'))
+    ch_date = Column(DateTime, default=func.now())
     ch_field = Column(String(50))
     ch_field_qty = Column(Text)
+    inventory = relationship('Inventory', back_populates='inv_id_ch_fk')
 
 class Sales(Base):
     __tablename__ = "Sales"
 
-    sale_id = Column(Double,primary_key= True, index=True)
-    inv_id = Column(Integer,ForeignKey('Inventory.inv_id'))
-    timestamp = Column(DateTime,default=func.now())
-    quantity_sold  = Column(Integer)
+    sale_id = Column(Double, primary_key=True, index=True)
+    inv_id = Column(Integer, ForeignKey('Inventory.inv_id'))
+    timestamp = Column(DateTime, default=func.now())
+    quantity_sold = Column(Integer)
     price_per_quantity = Column(Integer)
-
+    inventory = relationship('Inventory', back_populates='inv_id_sales_fk')
 
 engine = create_engine(database_url)
 Base.metadata.create_all(bind=engine)
