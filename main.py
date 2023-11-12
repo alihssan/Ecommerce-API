@@ -59,15 +59,14 @@ async def retrieve_sales(sale_id: int = Query(None),
                 return sale_list
             
         if inventory_id is not None:
-            sale = db.query(Sales).all()
-            print(sale)
+            sale = db.query(Sales).filter(Sales.inv_id == inventory_id).all()
             sale_list.extend(sale)
-            if sale is None:
+            if sale_list == []:
                 content = {"message": f'Inventory with id {inventory_id} wasnot sold'}
                 return JSONResponse(content=content,
                                     status_code=404)
             else:
-                return sale
+                return sale_list
         
         if category_id is not None:
             inventory = db.query(Inventory).filter(Inventory.cat_id == category_id).all()
