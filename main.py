@@ -38,15 +38,21 @@ def calculate_revenue(db , start_date: datetime, end_date: datetime):
         JSONResponse(content="Connection closed!",
                     status_code=504)
 
+
 @app.get("/sales/filter")
 async def retrieve_sales(sale_id: int = Query(None),
                          inventory_id: int = Query(None),
-                         category_id:int = Query(None)):
+                         category_id:int = Query(None),
+                         start_date: date = Query(None),
+                         end_date: date = Query(None)):
     db = get_db()
     sale_list = []
     if db:
-        if (not sale_id and not inventory_id and not category_id):
+        if (not sale_id and not inventory_id and not category_id and not start_date and not end_date):
             return JSONResponse(content="Atleast one query param is required.",
+                                status_code=400)
+        if (not start_date or not end_date):
+            return JSONResponse(content="Both start_date and end_date are required.",
                                 status_code=400)
         if sale_id is not None:
             sale = db.query(Sales).filter(Sales.sale_id == sale_id).first()
@@ -80,8 +86,10 @@ async def retrieve_sales(sale_id: int = Query(None),
                                     status_code=404)
             else:
                 return sale_list
-
-            
+        
+        if start_date and end_date:
+            sales = db.query(Sales).filter(Sales.timestamp >= start_date, Sales.timestamp <= end_date).all()
+            return sales
         
     else:
         return "connection not established"
@@ -116,8 +124,60 @@ def analyze_revenue(
         "total_revenue": total_revenue
     }
 
+@app.get("/sales/revenue/compare")
+def analyze_revenue(
+    category1: int = Query(None),
+    category2: int = Query(None),
+    start_date1: date = Query(None),
+    start_date2: date = Query(None),
+    end_date1: date = Query(None),
+    end_date2: date = Query(None)
 
+):
+    db = get_db()
+    if (not category1 and not category2):
+        if (not start_date1 or not end_date1) and (not start_date2 or not end_date2):
+            return JSONResponse(content="Both start_date and end_date are required.",
+                                status_code=400)
+        
+        total_revenue1 = calculate_revenue(db, start_date1, end_date1)
+        total_revenue2 = calculate_revenue(db, start_date2, end_date2)
 
+        if total_revenue1<total_revenue2:
+            percent_increase = (total_revenue1/total_revenue2)*100 
+        else: percent_increase = (total_revenue2/total_revenue1)*100
+
+        return {
+            "message": f"Revenue analysis for time duration {start_date1} - {end_date1} and {start_date2} - {end_date2}",
+            "total_revenue_by_period_1": total_revenue1,
+            "total_revenue_by_period_2": total_revenue2,
+            "percentage_increase": f"Percentage increase {percent_increase}"
+        }
+    
+    elif (category1 and category2):
+        total_revenueA = 0
+        total_revenueB = 0
+        if (start_date1 or end_date1) or (start_date2 or end_date2):
+            return JSONResponse(content="Both start_date and end_date are required.",
+                                status_code=400)
+        
+        inventoryA = list(db.query(Inventory).filter(Inventory.cat_id == category1).all())
+        inventoryB = list(db.query(Inventory).filter(Inventory.cat_id == category2).all())
+
+        for inv in inventoryA:
+            sales = db.query(Sales).filter(Sales.inv_id == inv.inv_id).all() 
+            total_revenueA += sum(sale.price_per_quantity * sale.quantity_sold for sale in sales) 
+
+        for inv in inventoryB:
+            sales = db.query(Sales).filter(Sales.inv_id == inv.inv_id).all() 
+            total_revenueB += sum(sale.price_per_quantity * sale.quantity_sold for sale in sales)  
+    
+        return {
+            "message": f"Revenue analysis for {category1} and {category2}",
+            "total_revenueA": total_revenueA,
+            "total_revenueB": total_revenueB,
+            "percent_inc_A_B": (total_revenueB/total_revenueA)*100
+        }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
