@@ -18,7 +18,7 @@ engine = create_engine(database_url)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-#APIs 
+#Session manage 
 def get_db():
     db = Session()
     try:
@@ -27,14 +27,14 @@ def get_db():
         db.close()
 
 @app.post("/items/")
-async def create_item(item: Item, db: Session = get_db):
+async def create_item(item: Item, db: Session = get_db()):
     db.add(item)
     db.commit()
     db.refresh(item)
     return item
 
 @app.get("/items/{item_id}")
-async def read_item(item_id: int, db: Session = get_db):
+async def read_item(item_id: int, db: Session = get_db()):
     item = db.query(Item).filter(Item.id == item_id).first()
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
