@@ -24,6 +24,7 @@ Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 #Session manage 
 def get_db():
+    
     db = Session()
     try:
         return db
@@ -31,6 +32,17 @@ def get_db():
         db.close()
 
 def calculate_revenue(db , start_date: datetime, end_date: datetime):
+    """
+    Calculate total revenue for a given time interval.
+
+    Parameters:
+    - db: Database session
+    - start_date: Start date for the revenue calculation
+    - end_date: End date for the revenue calculation
+
+    Returns:
+    - Total revenue for the specified time interval
+    """
     if db:
         sales = db.query(Sales).filter(Sales.timestamp >= start_date, Sales.timestamp <= end_date).all()
         total_revenue = sum(sale.price_per_quantity * sale.quantity_sold for sale in sales)
@@ -46,6 +58,20 @@ async def retrieve_sales(sale_id: int = Query(None),
                          category_id:int = Query(None),
                          start_date: date = Query(None),
                          end_date: date = Query(None)):
+    """
+    Retrieve sales data based on specified filters.
+
+    Parameters:
+    - sale_id: ID of the sale to retrieve
+    - inventory_id: ID of the inventory to retrieve sales for
+    - category_id: ID of the category to retrieve sales for
+    - start_date: Start date for the time range of sales
+    - end_date: End date for the time range of sales
+
+    Returns:
+    - List of sales data matching the specified filters
+    """
+    
     db = get_db()
     sale_list = []
     if db:
@@ -101,6 +127,17 @@ def analyze_revenue(
     end_date: date = Query(None),
     interval: str = Query("daily")
 ):
+    """
+    Analyze revenue for a specified time interval.
+
+    Parameters:
+    - start_date: Start date for the revenue analysis
+    - end_date: End date for the revenue analysis
+    - interval: Time interval for analysis (daily, weekly, monthly, annual)
+
+    Returns:
+    - Revenue analysis results
+    """
     db = get_db()
     if (not start_date or not end_date) or (not start_date and not end_date):
         return JSONResponse(content="Both start_date and end_date are required.",
@@ -135,6 +172,20 @@ def analyze_revenue(
     end_date2: date = Query(None)
 
 ):
+    """
+    Compare revenue between two categories for specified time intervals.
+
+    Parameters:
+    - category1: ID of the first category
+    - category2: ID of the second category
+    - start_date1: Start date for the time range of the first category
+    - start_date2: Start date for the time range of the second category
+    - end_date1: End date for the time range of the first category
+    - end_date2: End date for the time range of the second category
+
+    Returns:
+    - Revenue comparison results
+    """
     db = get_db()
     if (not category1 and not category2):
         if (not start_date1 or not end_date1) and (not start_date2 or not end_date2):
@@ -185,6 +236,16 @@ def analyze_revenue(
     inv_id: int = Query(None),
     cat_id: int = Query(None)
 ):
+    """
+    Retrieve inventory status based on specified filters.
+
+    Parameters:
+    - inv_id: ID of the inventory
+    - cat_id: ID of the category
+
+    Returns:
+    - Inventory status information
+    """
     db = get_db()
     if (not inv_id and not cat_id):
         return JSONResponse(content="Atleast inv_id or cat_id is required.",
@@ -205,6 +266,18 @@ def analyze_revenue(
     unit_price: int=Query(None), 
     cat_id: int= Query(None), 
 ):
+    """
+    Update inventory information.
+
+    Parameters:
+    - inv_id: ID of the inventory
+    - current_stock: Updated current stock value
+    - unit_price: Updated unit price value
+    - cat_id: ID of the category
+
+    Returns:
+    - Updated inventory information
+    """
     db = get_db()
     if (not inv_id and not cat_id and not current_stock and not unit_price):
         return JSONResponse(content="Atleast inv_id or cat_id is required.",
@@ -251,6 +324,15 @@ def analyze_revenue(
 def analyze_revenue(
     inv_id: int = Query(None)
 ):
+    """
+    Retrieve the inventory changes for a specific inventory.
+
+    Parameters:
+    - inv_id: ID of the inventory
+
+    Returns:
+    - List of inventory changes for the specified inventory
+    """
     db = get_db()
     if (not inv_id):
         return JSONResponse(content="Atleast inv_id is required.",
