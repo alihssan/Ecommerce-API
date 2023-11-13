@@ -35,10 +35,11 @@ class Inventory_Changes(Base):
     __tablename__ = "Inventory_Changes"
 
     ch_id = Column(Integer, primary_key=True, index=True)
-    inv_id = Column(Integer, ForeignKey('Inventory.inv_id'))
     ch_date = Column(DateTime, default=func.now())
-    ch_field = Column(String(50))
-    ch_field_qty = Column(Text)
+    inv_id = Column(Integer, ForeignKey('Inventory.inv_id'))
+    name = Column(Text)
+    current_stock = Column(Integer)
+    unit_price = Column(Integer)
     inventory = relationship('Inventory', back_populates='inv_id_ch_fk')
 
 class Sales(Base):

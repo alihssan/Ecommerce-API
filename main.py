@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import uvicorn
 from datetime import date,datetime,timedelta
+import random
 
 #load variables from .env here
 load_dotenv()
@@ -178,6 +179,91 @@ def analyze_revenue(
             "total_revenueB": total_revenueB,
             "percent_inc_A_B": (total_revenueB/total_revenueA)*100
         }
+
+@app.get("/inventory/status")
+def analyze_revenue(
+    inv_id: int = Query(None),
+    cat_id: int = Query(None)
+):
+    db = get_db()
+    if (not inv_id and not cat_id):
+        return JSONResponse(content="Atleast inv_id or cat_id is required.",
+                            status_code=400)
+    
+    inventory = db.query(Inventory).filter(Inventory.inv_id == inv_id).first()
+    content = {
+        "current_stock": inventory.current_stock,
+        "low_stock_alert":inventory.low_stock_alert
+    }
+    return JSONResponse(content=content,
+                            status_code=200)
+
+@app.get("/inventory/update")
+def analyze_revenue(
+    inv_id: int = Query(None),
+    current_stock: int=Query(None), 
+    unit_price: int=Query(None), 
+    cat_id: int= Query(None), 
+):
+    db = get_db()
+    if (not inv_id and not cat_id and not current_stock and not unit_price):
+        return JSONResponse(content="Atleast inv_id or cat_id is required.",
+                            status_code=400)
+    #Retrieve older and update with the new one
+    inventory = db.query(Inventory).filter(Inventory.inv_id == inv_id).first()
+    if inventory is not None:
+        if current_stock:
+            inventory.current_stock = current_stock
+        elif unit_price:
+            inventory.unit_price = unit_price
+        
+        #First update the Inventory changes table
+        latest_changes = db.query(Inventory_Changes).filter(Inventory_Changes.inv_id == inv_id).order_by(Inventory_Changes.ch_date.desc()).first()
+        if latest_changes is None:
+            ch_id = random.randint(1000, 9999)
+
+            changes = Inventory_Changes(
+                inv_id = inv_id,
+                ch_id = ch_id,
+                ch_date=datetime.now(),
+                current_stock = current_stock,
+                unit_price = unit_price,
+                name = inventory.name
+                )
+            db.add(changes)
+        else:
+            if current_stock:
+                latest_changes.current_stock = current_stock
+            elif unit_price:
+                 latest_changes.unit_price = unit_price
+
+        db.commit()
+        content = {
+            "current_stock": inventory.current_stock,
+            "unit_price":inventory.unit_price,
+            "updated_inventory_id" : inv_id
+        }
+        return JSONResponse(content=content,
+                                status_code=200)
+        
+
+@app.get("/inventory/update/track")
+def analyze_revenue(
+    inv_id: int = Query(None)
+):
+    db = get_db()
+    if (not inv_id):
+        return JSONResponse(content="Atleast inv_id is required.",
+                            status_code=400)
+    #Retrieve older and update with the new one
+    inventory_changes = db.query(Inventory_Changes).filter(Inventory_Changes.inv_id == inv_id).all()
+    if inventory_changes is not None:
+        return inventory_changes
+    else:
+        return JSONResponse(content="No inventory change found for this inventory",
+                                status_code=404)
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
