@@ -63,60 +63,115 @@ uvicorn main:app --reload
 
 ```
 
-#Endpoints
-Retrieve Sales Data
-Endpoint: /sales/filter
-Parameters:
 
-sale_id: int (optional)
+*
+
+## *Endpoints
+
+**
+
+**Retrieve Sales Data**
+
+**Endpoint**: /sales/filter
+
+**Parameters:**
+
+  sale_id: int (optional)
+
 inventory_id: int (optional)
+
 category_id: int (optional)
-start_date: date (optional)
-end_date: date (optional)
-Description: Retrieve sales data based on specified parameters.
-
-#Analyze Revenue
-Endpoint: /sales/revenue
-Parameters:
 
 start_date: date (optional)
+
 end_date: date (optional)
+
+**Description**: Retrieve sales data based on specified parameters.
+
+  
+
+**
+
+## Analyze Revenue
+
+**
+
+**Endpoint:** /sales/revenue
+
+**Parameters:**
+
+start_date: date (optional)
+
+end_date: date (optional)
+
 interval: str (default: "daily")
-Description: Analyze revenue within a specified date range and interval.
 
-#Compare Revenue
-Endpoint: /sales/revenue/compare
-Parameters:
+**Description:** Analyze revenue within a specified date range and interval.
+
+  
+
+## **Compare Revenue**
+
+  
+
+**Endpoint:** /sales/revenue/compare
+
+**Parameters:**
 
 category1: int (optional)
-category2: int (optional)
-start_date1: date (optional)
-end_date1: date (optional)
-start_date2: date (optional)
-end_date2: date (optional)
-Description: Compare revenue between two categories within specified date ranges.
 
-#Inventory Status
-Endpoint: /inventory/status
-Parameters:
+category2: int (optional)
+
+start_date1: date (optional)
+
+end_date1: date (optional)
+
+start_date2: date (optional)
+
+end_date2: date (optional)
+
+**Description:** Compare revenue between two categories within specified date ranges.
+
+  
+
+## **Inventory Status**
+
+**Endpoint:** /inventory/status
+
+**Parameters:**
 
 inv_id: int (optional)
-cat_id: int (optional)
-Description: Retrieve current stock and low stock alert status for an inventory item.
 
-#Update Inventory
-Endpoint: /inventory/update
-Parameters:
+cat_id: int (optional)
+
+**Description:** Retrieve current stock and low stock alert status for an inventory item.
+
+  
+
+## **Update Inventory**
+
+**Endpoint:** /inventory/update
+
+**Parameters:**
 
 inv_id: int (required)
+
 current_stock: int (optional)
+
 unit_price: int (optional)
+
 cat_id: int (optional)
-Description: Update inventory details and track changes.
 
-#Inventory Update History
-Endpoint: /inventory/update/track
-Parameters:
+**Description:** Update inventory details and track changes.
 
-inv_id: int (required)
-Description: Retrieve the update history of an inventory item.
+  
+
+## **Inventory Update History**
+
+**Endpoint:** /inventory/update/track
+
+**Parameters:**
+
+  inv_id: int (required)
+
+**Description:** Retrieve the update history of an inventory item.
