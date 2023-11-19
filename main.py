@@ -53,11 +53,7 @@ def calculate_revenue(db , start_date: datetime, end_date: datetime):
 
 
 @app.get("/sales/filter")
-async def retrieve_sales(sale_id: int = Query(None),
-                         inventory_id: int = Query(None),
-                         category_id:int = Query(None),
-                         start_date: date = Query(None),
-                         end_date: date = Query(None)):
+async def retrieve_sales(sale_id: int = Query(None),inventory_id: int = Query(None),category_id:int = Query(None),start_date: date = Query(None),end_date: date = Query(None)):
     """
     Retrieve sales data based on specified filters.
 
