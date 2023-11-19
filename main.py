@@ -118,7 +118,8 @@ async def retrieve_sales(sale_id: int = Query(None),inventory_id: int = Query(No
         return "connection not established"
 
 @app.get("/sales/revenue")
-def analyze_revenue(start_date: date = Query(None),end_date: date = Query(None),
+def analyze_revenue(start_date: date = Query(None),
+                    end_date: date = Query(None),
                     interval: str = Query("daily")):
     """
     Analyze revenue for a specified time interval.
