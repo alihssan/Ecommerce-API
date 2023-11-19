@@ -337,7 +337,6 @@ def analyze_revenue(
     if (not inv_id):
         return JSONResponse(content="Atleast inv_id is required.",
                             status_code=400)
-    #Retrieve older and update with the new one
     inventory_changes = db.query(Inventory_Changes).filter(Inventory_Changes.inv_id == inv_id).all()
     if inventory_changes is not None:
         return inventory_changes
